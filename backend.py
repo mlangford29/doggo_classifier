@@ -3,20 +3,29 @@
 # imports
 import os
 import sys
-#import urllib
 import urllib.request, json
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from flask import Flask, session, render_template, request
 
 from src.common import consts
 from src.data_preparation import dataset
 from src.freezing import freeze
 from src.common import paths
 
+app = Flask(__name__)
+
+# just the root!
+@app.route('/')
+def root():
+	print(os.getcwd())
+	return render_template('index.html')
+
 # function that will take the image and hit the model
 # not sure if this picture needs to be in the byte form but we'll check this out later
 ##### CURRENTLY A PIC PATH BUT WOULD BE BETTER TO NOT BE
+@app.route('/hit_model')
 def hit_model(pic_path):
 
 
@@ -76,6 +85,7 @@ def hit_model(pic_path):
 # hit the petfinder API!
 ##### HERE IS AN EXAMPLE REQUEST
 # http://api.petfinder.com/pet.find?format=json&key=73b809ff630a0a072606a63a533503fe&animal=dog&breed=Golden%20Retriever&count=1&output=full&location=78705
+@app.route('/hit_petfinder')
 def hit_petfinder(breed, count = 1):
 
 	# first, we need to develop that url
@@ -95,6 +105,7 @@ def hit_petfinder(breed, count = 1):
 		dog_data = json.loads(r.read().decode())
 
 # function that converts lower_case dog form into a fancier one
+#@app.route('/convert_breed')
 def convert_dog_breed(breed):
 
 	# if there's an underscore, replace with a space
@@ -143,29 +154,21 @@ def find_description():
 
 
 # main for right now
-def main():
+if __name__ == '__main__':
 
+	#app = Flask('main') ##### not sure if the name matters here
+	app.run(debug=True)
+
+	'''
 	probs = hit_model('golden.jpeg')
 	print(probs)
 	breed_name = convert_dog_breed(probs.iloc[0]['breed'])
 
 	##### this will create the global json for dog_data
 	hit_petfinder(breed_name)
+	'''
 
-	print(find_name())
-	print('')
-	print(find_age())
-	print('')
-	print(find_sex())
-	print('')
-	print(find_photo_url_list())
-	print('')
-	print(find_description())
-	print('')
-
-
-
-main()
+	
 
 
 
