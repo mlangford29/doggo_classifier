@@ -7,6 +7,7 @@ import urllib.request, json
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import exifread as ef
 from flask import Flask, session, render_template, request
 
 from src.common import consts
@@ -19,16 +20,19 @@ app = Flask(__name__)
 # just the root!
 @app.route('/')
 def root():
-	print(os.getcwd())
 	return render_template('index.html')
 
 # function that will take the image and hit the model
 # not sure if this picture needs to be in the byte form but we'll check this out later
 ##### CURRENTLY A PIC PATH BUT WOULD BE BETTER TO NOT BE
-@app.route('/hit_model')
-def hit_model(pic_path):
+@app.route('/hit_model', methods = ['POST'])
+def hit_model():
 
 
+	#print(request.args)
+	#print(os.getcwd())
+	#pic_path = './' + str(request.files['dogspot'])
+	img_raw = request.files['dogspot'].read()
 
 	def infer(model_name, img_raw):
 	    with tf.Graph().as_default(), tf.Session().as_default() as sess:
@@ -47,10 +51,10 @@ def hit_model(pic_path):
 
 
 	        return df.sort_values(['prob'], ascending=False)
-
-	##### IF YOU CAN TAKE IN RAW CAMERA FEED, THAT WOULD BE GREAT
+	'''
 	with open(pic_path, 'rb') as f:
 		img_raw = f.read()
+	'''
 
 	'''
 	def classify(resource_type, path):
@@ -63,8 +67,15 @@ def hit_model(pic_path):
 	        with open(path, 'rb') as f:
 	'''
 	
-	#return infer(consts.CURRENT_MODEL_NAME, img_raw)
 	probs = infer(consts.CURRENT_MODEL_NAME, img_raw)
+
+	##### CHECK THE PROB
+	bool_conf = is_breed_confident(probs)
+
+	if not bool_conf:
+
+		# return something saying we're not sure what dog it is
+		return 0
 	
 	'''
 	if __name__ == '__main__':
@@ -76,11 +87,28 @@ def hit_model(pic_path):
 	'''
 
 	# returning the top 5 of them, sorted!
+	print(probs.sort_values(['prob'], ascending=False).take(range(5)))
 	return probs.sort_values(['prob'], ascending=False).take(range(5))
 
 
 # function that checks to see if we're below confidence threshold
 # with the highest dog
+def is_breed_confident(probs):
+
+	# get the top one
+	#print(probs.sort_values(['prob'], ascending=False).iloc[0]['prob'])
+	top_prob = probs.sort_values(['prob'], ascending=False).iloc[0]['prob']
+
+	# confidence threshold of 30%
+	if top_prob < .3:
+
+		return False
+
+	# means that we're confident in which breed we have!
+	return True
+
+
+
 
 # hit the petfinder API!
 ##### HERE IS AN EXAMPLE REQUEST
@@ -152,21 +180,78 @@ def find_photo_url_list():
 def find_description():
 	return dog_data['petfinder']['pets']['pet']['description']['$t']
 
+# doing some GPS stuff!
+def _convert_to_degress(value):
+    """
+    Helper function to convert the GPS coordinates stored in the EXIF to degress in float format
+    :param value:
+    :type value: exifread.utils.Ratio
+    :rtype: float
+    """
+    d = float(value.values[0].num) / float(value.values[0].den)
+    m = float(value.values[1].num) / float(value.values[1].den)
+    s = float(value.values[2].num) / float(value.values[2].den)
+
+    return d + (m / 60.0) + (s / 3600.0)
+
+def getGPS(filepath):
+    '''
+    returns gps data if present other wise returns empty dictionary
+    '''
+    with open(filepath, 'rb') as f:
+        tags = ef.process_file(f)
+        latitude = tags.get('GPS GPSLatitude')
+        latitude_ref = tags.get('GPS GPSLatitudeRef')
+        longitude = tags.get('GPS GPSLongitude')
+        longitude_ref = tags.get('GPS GPSLongitudeRef')
+        if latitude:
+            lat_value = _convert_to_degress(latitude)
+            if latitude_ref.values != 'N':
+                lat_value = -lat_value
+        else:
+            return {}
+        if longitude:
+            lon_value = _convert_to_degress(longitude)
+            if longitude_ref.values != 'E':
+                lon_value = -lon_value
+        else:
+            return {}
+        return {'latitude': lat_value, 'longitude': lon_value}
+    return {}
+
+# takes an image and returns the zip code that it was taken in
+# if we're unable to find a location in the image, 
+# we'll return '78705'
+@app.route('/img_to_zip')
+def img_to_zip(img_path):
+
+	lat_long_dict = getGPS(img_path)
+
+	##### case where we can't find anything
+	if lat_long_dict == {}:
+		return '78705'
+	else:
+		##### USE GOOGLE??
+		return
 
 # main for right now
 if __name__ == '__main__':
 
-	#app = Flask('main') ##### not sure if the name matters here
+	#print(getGPS('golden.jpeg'))
 	app.run(debug=True)
 
 	'''
-	probs = hit_model('golden.jpeg')
-	print(probs)
-	breed_name = convert_dog_breed(probs.iloc[0]['breed'])
+	probs = hit_model('test.jpg')
+	
+	if(probs == 0):
+		print('WE ARE NOT CONFIDENT IN DOGGO')
+	else:
+		breed_name = convert_dog_breed(probs.iloc[0]['breed'])
 
 	##### this will create the global json for dog_data
-	hit_petfinder(breed_name)
+	#hit_petfinder(breed_name)
 	'''
+	
 
 	
 
