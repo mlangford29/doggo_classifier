@@ -3,8 +3,8 @@
 # imports
 import os
 import sys
-import urllib
-
+#import urllib
+import urllib.request, json
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -65,11 +65,81 @@ def hit_model(pic_path):
 
 	    print(probs.sort_values(['prob'], ascending=False).take(range(5)))
 	'''
+
+	# returning the top 5 of them, sorted!
 	return probs.sort_values(['prob'], ascending=False).take(range(5))
 
 
+# function that checks to see if we're below confidence threshold
+# with the highest dog
+
+# hit the petfinder API!
+##### HERE IS AN EXAMPLE REQUEST
+# http://api.petfinder.com/pet.find?format=json&key=73b809ff630a0a072606a63a533503fe&animal=dog&breed=Golden%20Retriever&count=1&output=full&location=78705
+def hit_petfinder(breed, count = 1):
+
+	# first, we need to develop that url
+	### CHECK TO SEE IF THERE'S A SPACE IN DOG BREED NAME
+	if ' ' in breed:
+		breed = breed.replace(' ', '%20')
+
+	##### THIS IS WHERE WE WOULD GET THE LOCATION
+	##### BUT RIGHT NOW I'M HARDCODING IT TO 78705
+	loc = '78705'
+
+	url = 'http://api.petfinder.com/pet.find?format=json&key=73b809ff630a0a072606a63a533503fe&animal=dog&breed={}&count={}&output=full&location={}'.format(
+			breed, count, loc)
+
+	with urllib.request.urlopen(url) as r:
+		global dog_data
+		dog_data = json.loads(r.read().decode())
 
 # function that converts lower_case dog form into a fancier one
+def convert_dog_breed(breed):
+
+	# if there's an underscore, replace with a space
+	breed_tokens = breed.split('_')
+
+	breed_str = ''
+
+	# then capitalize all words in the string
+	for breed_tok in breed_tokens:
+
+		if breed_str != '':
+			breed_str += ' '
+		breed_str += breed_tok.capitalize()
+
+	return breed_str
+
+# takes json data and returns the name of the dog
+def find_name():
+
+	##### these are all using global data for the dog data!
+	return dog_data['petfinder']['pets']['pet']['name']['$t']
+
+# takes json data and returns the breed(s) of the dog
+##### you need to check "mix" to see if that's yes
+
+# takes json data and returns the age of the dog
+def find_age():
+	return dog_data['petfinder']['pets']['pet']['age']['$t']
+
+# takes json data and returns the sex of the dog
+def find_sex():
+	return dog_data['petfinder']['pets']['pet']['sex']['$t']
+
+# takes json data and returns URL of image of the dog
+# ok actually there may be a whole bunch of urls, so we'll get them in a list
+def find_photo_url_list():
+	url_list = []
+	for photo_dict in dog_data['petfinder']['pets']['pet']['media']['photos']['photo']:
+		print(photo_dict)
+		url_list.append(photo_dict['$t'])
+	return url_list
+
+# takes json data and returns string of the description of the dog
+def find_description():
+	return dog_data['petfinder']['pets']['pet']['description']['$t']
 
 
 # main for right now
@@ -77,6 +147,23 @@ def main():
 
 	probs = hit_model('golden.jpeg')
 	print(probs)
+	breed_name = convert_dog_breed(probs.iloc[0]['breed'])
+
+	##### this will create the global json for dog_data
+	hit_petfinder(breed_name)
+
+	print(find_name())
+	print('')
+	print(find_age())
+	print('')
+	print(find_sex())
+	print('')
+	print(find_photo_url_list())
+	print('')
+	print(find_description())
+	print('')
+
+
 
 main()
 
