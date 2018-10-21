@@ -99,13 +99,15 @@ def hit_model():
 	hit_petfinder(breed_name)
 	print(dog_data)
 
+	print('')
 	name = find_name()
 	age = find_age()
 	sex = find_sex()
 	photo_url = find_photo_url_list()[0]
 	description = find_description()
+	print('')
 	
-	return view.html.format(breed_message, photo_url, name, age, sex, description)
+	return view.disp_str.format(breed_message, photo_url, name, age, sex, description)
 
 
 # function that checks to see if we're below confidence threshold
@@ -186,7 +188,6 @@ def find_sex():
 def find_photo_url_list():
 	url_list = []
 	for photo_dict in dog_data['petfinder']['pets']['pet']['media']['photos']['photo']:
-		#print(photo_dict)
 		url_list.append(photo_dict['$t'])
 	return url_list
 

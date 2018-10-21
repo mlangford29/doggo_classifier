@@ -7,43 +7,43 @@
 
 #Here is the nearest dog of that breed looking for a home[at the first <p>]
 
-html = """<! DOCTYPE html>	
-<html lang = "en">
+disp_str = """<! DOCTYPE html>	
+<html lang = "en" id = "test">
 	<head>
 		<title>Dog View</title>
 		<meta charset = "Utf-8"/>
 		
 		<style>
-html{
+#test{{
 	color: #0F1C2D;
 	background-color: #7AA1D3;
 	font-family: Verdana, Geneva, sans-serif;
-}
-#doggo{
+}}
+#doggo{{
 	background-color: #E29CA4;
 	padding: 20px;
 	border-radius: 20px;
 	text-align: center;
 
-}
-#c1{
+}}
+#c1{{
 	text-align:center;
-}
-#p1{
+}}
+#p1{{
 	position: relative;
 	top: 30%;
 	left: 40%;
-}
-#c2{
+}}
+#c2{{
 	position: relative;
 	top: 40%;
 	left: 30%;
-}
-#d{
+}}
+#d{{
 	position: relative;
 	top: 70%;
 	left: 20%;
-}
+}}
 	</style>
 	</head>
 	
@@ -51,7 +51,7 @@ html{
 	<h1 id = "doggo">Dog-go</h1>
 	<h1>{}</h1>
 	<p>Here is the nearest dog of that breed looking for a home</p>
-	<img src = "../golden.jpeg" alt = "good doggo" width = "30%" id = "doggo"/>
+	<img src = "{}" alt = "good doggo" width = "15%" id = "doggo"/>
 	<h2>Meet {}! Age: {}</h2>
 	{}
 	<p>Description:</p>
