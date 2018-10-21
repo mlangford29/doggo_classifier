@@ -17,7 +17,7 @@ html = """<! DOCTYPE html>
 	<body>
 	<h1>{}</h1>
 	<p>Here is the nearest dog of that breed looking for a home</p>
-	<img src = "{}" alt = "good doggo"/>
+	<img src = "{}" alt = "good doggo" width = "150%"/>
 	<h2>Meet {}! Age: {}</h2>
 	{}
 	<p>Description:</p>
