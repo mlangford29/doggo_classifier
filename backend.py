@@ -2,6 +2,7 @@
 
 # imports
 import os
+import view
 import sys
 import urllib.request, json
 import numpy as np
@@ -27,7 +28,6 @@ def root():
 ##### CURRENTLY A PIC PATH BUT WOULD BE BETTER TO NOT BE
 @app.route('/hit_model', methods = ['POST'])
 def hit_model():
-
 
 	#print(request.args)
 	#print(os.getcwd())
@@ -68,14 +68,10 @@ def hit_model():
 	'''
 	
 	probs = infer(consts.CURRENT_MODEL_NAME, img_raw)
+	probs = probs.sort_values(['prob'], ascending=False)
 
 	##### CHECK THE PROB
 	bool_conf = is_breed_confident(probs)
-
-	if not bool_conf:
-
-		# return something saying we're not sure what dog it is
-		return 0
 	
 	'''
 	if __name__ == '__main__':
@@ -86,9 +82,29 @@ def hit_model():
 	    print(probs.sort_values(['prob'], ascending=False).take(range(5)))
 	'''
 
+	if not bool_conf:
+
+		breed_message = 'Sorry, it looks like we aren\'t confident in finding the dog in this picture\nLet\'s search for some good Golden Retrievers!'
+		breed_name = 'Golden Retriever'
+
 	# returning the top 5 of them, sorted!
-	print(probs.sort_values(['prob'], ascending=False).take(range(5)))
-	return probs.sort_values(['prob'], ascending=False).take(range(5))
+	else:
+		
+		breed_name = convert_dog_breed(probs.iloc[0]['breed'])
+		breed_message = 'It looks like this is a picture of a {}!'.format(breed_name)
+
+		#prob = probs.sort_values(['prob'], ascending=False).iloc[0]['prob']
+
+	# grab that json data!
+	hit_petfinder(breed_name)
+
+	name = find_name()
+	age = find_age()
+	sex = find_sex()
+	photo_url = find_photo_url_list()[0]
+	description = find_description()
+	
+	return view.html.format(breed_message, photo_url, name, age, sex, description)
 
 
 # function that checks to see if we're below confidence threshold
@@ -97,7 +113,7 @@ def is_breed_confident(probs):
 
 	# get the top one
 	#print(probs.sort_values(['prob'], ascending=False).iloc[0]['prob'])
-	top_prob = probs.sort_values(['prob'], ascending=False).iloc[0]['prob']
+	top_prob = probs.iloc[0]['prob'] #probs.sort_values(['prob'], ascending=False).iloc[0]['prob']
 
 	# confidence threshold of 30%
 	if top_prob < .3:
@@ -107,13 +123,10 @@ def is_breed_confident(probs):
 	# means that we're confident in which breed we have!
 	return True
 
-
-
-
 # hit the petfinder API!
 ##### HERE IS AN EXAMPLE REQUEST
 # http://api.petfinder.com/pet.find?format=json&key=73b809ff630a0a072606a63a533503fe&animal=dog&breed=Golden%20Retriever&count=1&output=full&location=78705
-@app.route('/hit_petfinder')
+#@app.route('/hit_petfinder')
 def hit_petfinder(breed, count = 1):
 
 	# first, we need to develop that url
@@ -222,6 +235,7 @@ def getGPS(filepath):
 # takes an image and returns the zip code that it was taken in
 # if we're unable to find a location in the image, 
 # we'll return '78705'
+'''
 @app.route('/img_to_zip')
 def img_to_zip(img_path):
 
@@ -233,6 +247,7 @@ def img_to_zip(img_path):
 	else:
 		##### USE GOOGLE??
 		return
+'''
 
 # main for right now
 if __name__ == '__main__':
