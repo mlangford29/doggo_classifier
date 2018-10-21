@@ -97,6 +97,7 @@ def hit_model():
 
 	# grab that json data!
 	hit_petfinder(breed_name)
+	print(dog_data)
 
 	name = find_name()
 	age = find_age()
@@ -185,12 +186,15 @@ def find_sex():
 def find_photo_url_list():
 	url_list = []
 	for photo_dict in dog_data['petfinder']['pets']['pet']['media']['photos']['photo']:
-		print(photo_dict)
+		#print(photo_dict)
 		url_list.append(photo_dict['$t'])
 	return url_list
 
 # takes json data and returns string of the description of the dog
 def find_description():
+
+	if dog_data['petfinder']['pets']['pet']['description'] == {}:
+		return 'Sorry, no description available for this cute pupper'
 	return dog_data['petfinder']['pets']['pet']['description']['$t']
 
 # doing some GPS stuff!
