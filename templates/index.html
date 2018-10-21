@@ -4,14 +4,16 @@
 		<title>Dog-go</title>
 		<meta charset = "UTF-8"/>
 		<script type = "text/javascript" src = "index.js"></script>
+		<link rel = "stylesheet" title = "basic style"  type = "text/css" href = "./index.css" media = "all">
 	</head>
 	
 	<body>
-		<h1>Dog-go</h1>
-		<p>Give us your good dog spots</p>
+		<h1 id = "doggo">Dog-go</h1>
+		<p id = "give">Give us your good dog spots</p>
 		<form action = "/hit_model" method = "post" id = "formfile" enctype="multipart/form-data"> 
 		<input type = "file" name = "dogspot" id = "dogspot"/>
-		<input type = "submit" value = "submit" name = "Uploaded" onsubmit = "redirect();"/>
+		<input type = "submit" value = "submit" name = "Uploaded"/>
+		<input type = "reset" value = "reset"/>
 		</form>
 	</body>
 </html>

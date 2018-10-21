@@ -1,0 +1,54 @@
+html{
+	color: #0F1C2D;
+	background-color: #7AA1D3;
+	font-family: Verdana, Geneva, sans-serif;
+}
+#doggo{
+	position: fixed;
+	text-align: center;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #E29CA4;
+	width: 30%;
+	padding: 12%;
+	border-radius: 40px 40px 40px 40px;
+	line-height: 30px;
+	font-size: 50px;
+}
+#give{
+	position: fixed;
+	top: 71%;
+	left: 41%;
+}
+input[type = "file"]{
+	display: inline-block;
+	position: fixed;
+	top: 85%;
+	left: 38%;
+}
+
+input[type = "submit"]{
+	display: inline-block;
+	position: fixed;
+	top: 85%;
+	left: 55%;
+}
+
+input[type = "reset"]{
+	display: inline-block;
+	position: fixed;
+	top: 85%;
+	left: 59%;
+}
+
+#submit{
+	background-color: #0F1C2D;
+	color: #B4CEED;
+	padding: 7px;
+	border: none;
+	border-radius: 4px;
+}
+#submit:hover{
+	padding: 10px;
+}
